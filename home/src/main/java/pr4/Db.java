@@ -85,13 +85,15 @@ public class Db {
             e.printStackTrace();
         }
     }
-    public void delete(int id) {
+    public Product delete(int id) {
+        Product product = this.getProductById(id);
         String sql = "DELETE FROM PRODUCTS WHERE ID = " + id;
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return product;
     }
     public List<Product> getProductsByFilter(ProductFilter productFilter){
         List<Product> resultList = new ArrayList<>();
@@ -117,6 +119,23 @@ public class Db {
             throw new RuntimeException(e);
         }
         return resultList;
+    }
+    public Product getProductById(int id){
+        Product product = null;
+        String sql = "SELECT * FROM PRODUCTS WHERE ID == ?" ;
+        try(PreparedStatement preparedStatement = connection.prepareStatement(sql)){
+            preparedStatement.setInt(1, id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if(resultSet.next()) {
+                product = new Product(resultSet.getInt("ID"),
+                        resultSet.getString("NAME"),
+                        resultSet.getDouble("PRICE"),
+                        resultSet.getString("FACTORY_NAME"));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return product;
     }
 
     public static void main(String[] args) {
